@@ -1,0 +1,42 @@
+// Prisma schema untuk geonera-scheduler.
+// Hanya mengakses schedule schema — tidak ada dependency ke master/ingestion.
+// CRITICAL: Run `prisma generate` ONLY. NEVER run `prisma migrate`.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["schedule"]
+}
+
+model Cron {
+  id              String    @id @db.Uuid
+  name            String    @unique
+  description     String?
+  cronExpr        String    @map("cron_expr")
+  workerKey       String    @map("worker_key")
+  triggerMethod   String    @default("RABBITMQ") @map("trigger_method")
+  queueName       String?   @map("queue_name")
+  httpPath        String?   @map("http_path")
+  status          String    @default("ACTIVE")
+  lastTriggeredAt DateTime? @map("last_triggered_at") @db.Timestamptz
+  lastResult      Json?     @map("last_result")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @map("updated_at") @db.Timestamptz
+
+  @@map("crons")
+  @@schema("schedule")
+}
+
+model Setting {
+  key   String @id
+  value String
+
+  @@map("settings")
+  @@schema("schedule")
+}

@@ -1,0 +1,20 @@
+{
+  "name": "geonera-scheduler",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "db:generate": "bunx prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "amqplib": "^0.10.4",
+    "croner": "^9.0.0",
+    "postgres": "^3.4.4"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.5",
+    "@types/bun": "latest",
+    "prisma": "^5.22.0"
+  }
+}
