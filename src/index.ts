@@ -28,7 +28,14 @@ async function main() {
 
   // 2. Dedicated raw pg connection for LISTEN/NOTIFY
   //    (Prisma connection pool does not support LISTEN)
-  const pg = postgres(DATABASE_URL!)
+  //    Strip Prisma-only query params — the `postgres` lib forwards unknown
+  //    params as Postgres GUCs, and Postgres rejects connection_limit/pool_timeout
+  //    as unrecognized configuration parameters (fatal, crashes the process).
+  const rawPgUrl = new URL(DATABASE_URL!)
+  rawPgUrl.searchParams.delete('connection_limit')
+  rawPgUrl.searchParams.delete('pool_timeout')
+  rawPgUrl.searchParams.delete('schema')
+  const pg = postgres(rawPgUrl.toString())
 
   const cronSub = await pg.listen('cron_reload', async (cronId) => {
     console.log(`[notify] cron_reload → reloadJob(${cronId})`)
